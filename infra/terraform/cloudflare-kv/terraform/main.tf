@@ -119,19 +119,19 @@ resource "cloudflare_workers_kv_namespace" "app_kv" {
 output "wiring" {
   description = "Wiring document for downstream deploy-time binding resolution (pushed to orun secrets)"
   value = jsonencode({
-    app_kv_kv_id    = cloudflare_workers_kv_namespace.app_kv.id
-    app_kv_kv_title = cloudflare_workers_kv_namespace.app_kv.title
+    app_kv_id    = cloudflare_workers_kv_namespace.app_kv.id
+    app_kv_title = cloudflare_workers_kv_namespace.app_kv.title
   })
 }
 
 # --- Outputs (non-secret) ---
 
-output "app_kv_kv_id" {
+output "app_kv_id" {
   description = "Cloudflare Workers KV namespace ID for api-edge idempotency replay store"
   value       = cloudflare_workers_kv_namespace.app_kv.id
 }
 
-output "app_kv_kv_title" {
+output "app_kv_title" {
   description = "Cloudflare Workers KV namespace title (human-readable identifier)"
   value       = cloudflare_workers_kv_namespace.app_kv.title
 }
