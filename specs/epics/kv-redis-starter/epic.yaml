@@ -1,0 +1,33 @@
+# The epic's declaration. metadata.name equals the directory name; metadata.key
+# is the task-key prefix this epic reserves (KR → KR-1, KR-2, …). Owner, target
+# date and health are the platform's — never written here.
+apiVersion: orun.io/v1
+kind: Epic
+metadata:
+  name: kv-redis-starter
+  key: KR
+spec:
+  title: "Vercel's Redis Next.js Starter on Cloudflare Workers with Workers KV"
+  summary: "The Vercel Redis (formerly Vercel KV) Next.js Starter — one page whose view counter increments a Redis key on every request — runs on Cloudflare Workers + Static Assets through @opennextjs/cloudflare with the counter in a Workers KV namespace provisioned by Terraform through Orun, inside the Cirrus baseline's repository conventions. It is the smallest template that needs a binding, and it establishes the shape for every port that does: a wrangler template with wiring tokens, an offline fixture for the verify lane, and a live render from the infrastructure's wiring document on deploy."
+  state: backlog
+  milestones:
+    - name: "KR0 — the spec"
+      exitCriteria:
+        - "the doc set and the task contracts are on main"
+      tasks: [KR-1]
+    - name: "KR1 — the counter on Workers KV"
+      exitCriteria:
+        - "apps/web is the upstream template with the counter reading and writing the VIEWS KV binding"
+        - "the wrangler config renders per environment from the cloudflare-kv root's wiring document (fixture in verify, live in deploy)"
+        - "`pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` are green on main (Checks)"
+        - "`wrangler dev` serves the page and the count grows by one per request"
+      tasks: [KR-2]
+    - name: "KR2 — the KV namespace from Terraform"
+      exitCriteria:
+        - "infra/terraform/cloudflare-kv provisions the stage and prod namespaces and publishes the wiring document the app renders from"
+      tasks: [KR-3]
+    - name: "KR3 — ready to instantiate"
+      exitCriteria:
+        - "the README says how to run, test, preview and deploy it, and what KV's consistency means for the counter"
+        - "the as-built status records every departure from the upstream template"
+      tasks: [KR-4]
