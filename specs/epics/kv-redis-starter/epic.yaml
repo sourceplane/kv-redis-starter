@@ -9,7 +9,7 @@ metadata:
 spec:
   title: "Vercel's Redis Next.js Starter on Cloudflare Workers with Workers KV"
   summary: "The Vercel Redis (formerly Vercel KV) Next.js Starter — one page whose view counter increments a Redis key on every request — runs on Cloudflare Workers + Static Assets through @opennextjs/cloudflare with the counter in a Workers KV namespace provisioned by Terraform through Orun, inside the Cirrus baseline's repository conventions. It is the smallest template that needs a binding, and it establishes the shape for every port that does: a wrangler template with wiring tokens, an offline fixture for the verify lane, and a live render from the infrastructure's wiring document on deploy."
-  state: backlog
+  state: completed
   milestones:
     - name: "KR0 — the spec"
       exitCriteria:

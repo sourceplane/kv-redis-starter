@@ -8,7 +8,7 @@ The port keeps the template's page, layout, styles and components. It replaces t
 
 | Field | Value |
 |-------|-------|
-| Status | Draft |
+| Status | ✅ Shipped — KR0–KR3 landed (#1–#4); KV apply and live deploy gated on a linked workspace |
 | Cluster | **KR** (KR0–KR3) |
 | Owner(s) | `apps/web` (the page and the counter) · `tests/web` · `infra/terraform/cloudflare-kv` |
 | Builds on | `cirrus-baseline` conventions: the `cloudflare-kv` root and the `@@wiring(...)@@` deploy-time render |
@@ -16,7 +16,7 @@ The port keeps the template's page, layout, styles and components. It replaces t
 | Changes | The counter's store (Redis → Workers KV), the Workers build, tests, the KV root and the deploy contract; page copy says KV instead of Redis |
 | Decisions locked | (1) Workers KV, not a Durable Object: the template is a demo counter and KV is the one-to-one of Vercel KV; the design names the DO upgrade path. (2) `wrangler.jsonc` is rendered per environment from the wiring document; never committed. (3) `force-dynamic` stays: the count is per request. |
 | Gate | KR1 is the first user-visible rung. KR2 applies only with a linked workspace; it is verified by `terraform validate`. |
-| Shipped as | |
+| Shipped as | `main` after [#4](https://github.com/sourceplane/kv-redis-starter/pull/4); verified locally under `wrangler dev` with a local namespace |
 
 ## Read order
 

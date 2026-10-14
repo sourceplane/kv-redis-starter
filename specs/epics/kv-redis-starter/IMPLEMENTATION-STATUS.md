@@ -5,10 +5,10 @@ the code departed from `design.md` or from the upstream template.
 
 | Milestone | State | PR |
 |---|---|---|
-| KR0 — the spec | | |
-| KR1 — the counter on Workers KV | | |
-| KR2 — the KV namespace from Terraform | | |
-| KR3 — ready to instantiate | | |
+| KR0 — the spec | ✅ Shipped | [#1](https://github.com/sourceplane/kv-redis-starter/pull/1) |
+| KR1 — the counter on Workers KV | ✅ Shipped | [#2](https://github.com/sourceplane/kv-redis-starter/pull/2) |
+| KR2 — the KV namespace from Terraform | ✅ Shipped (validated; apply gated on a linked workspace) | [#3](https://github.com/sourceplane/kv-redis-starter/pull/3) |
+| KR3 — ready to instantiate | ✅ Shipped | [#4](https://github.com/sourceplane/kv-redis-starter/pull/4) |
 
 ## Departures from the upstream template
 
@@ -40,3 +40,22 @@ and the monorepo tracing root are the Workers build's.
 
 React 19's types accept async server components; the directive became an
 error.
+
+## Verified
+
+- Local: `pnpm run wire:fixture`, `pnpm typecheck`, `pnpm lint`, `pnpm test`
+  (2 tests), `pnpm build` green; `wrangler dev` over the built Worker with a
+  local namespace: `/` 200 ("KV on Cloudflare"), the count 4 → 5 → 6 across
+  three requests.
+- `terraform validate` green on `infra/terraform/cloudflare-kv`.
+- CI: `Checks` green on #2 and #3.
+- Not verified: the KV apply and a live deploy — both need the product
+  linked to an Orun workspace with a Cloudflare connection (`ORUN_CI`).
+
+## Versions
+
+| Package | Version | Why |
+|---|---|---|
+| next | 16.3.8 | newest inside `@opennextjs/cloudflare` 1.20.11's peer range |
+| @opennextjs/cloudflare | ^1.20.11 | `getCloudflareContext` for the binding; static-assets cache + `populateCache local` |
+| wrangler | ^4.151.0 | compatibility_date 2026-10-01 |
