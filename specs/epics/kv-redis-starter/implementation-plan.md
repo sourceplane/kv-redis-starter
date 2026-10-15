@@ -9,7 +9,7 @@ This doc set, `epic.yaml` and the task contracts, merged to `main`.
 
 **Done when**
 - the five documents and `epic.yaml` are on `main`
-- `tasks/KR-1..KR-4.TaskContract.yaml` exist
+- `tasks/KR-1..KR-4.TaskContract.yaml` exist (KR-5 joined with KR4)
 
 ## KR1 — the counter on Workers KV ✅
 
@@ -37,8 +37,39 @@ epic `completed`.
 - the README quick start works from a fresh clone
 - the status file lists every PR and departure
 
+## KR4 — a baseline, in one landing ✅
+
+`blueprint.yaml`, `repo-blueprint.yaml` (two phases: `01-product`,
+`02-docs`), `.baseline/` (identity, task contracts, the product's README),
+`tooling/rebrand`, `tooling/bootstrap`, `hooks/render-deployment-docs.sh`,
+`ai/context/`, `docs/phases/`, `BOOTSTRAP.md`, `testing/`, `baseline.yml`
+and `tag.yml` (design §6); and what the product needed to deploy from a
+fresh repository: `wrangler.jsonc` committed, dev rendering the fixture,
+`apps/web`'s enforced `dependsOn: cloudflare-kv` on main, `packages/`.
+
+**Done when**
+- orun at the bootstrap floor (v2.58.11), the lane pin (v2.78.4) and the
+  current CLI (v2.79.0) reads `repo-blueprint.yaml`, and
+  `testing/manifest.test.sh` holds the card to it
+- the product's own push-to-main plan applies `cloudflare-kv` before it
+  deploys `web` on stage and prod (`testing/placement.test.sh`)
+- `Baseline CI` is green: the contract tests, the wiring path, the leak gate,
+  the offline bootstrap and the end-to-end tier
+- the status file records what is proven offline and what only a live
+  bootstrap can prove
+
+## After KR4 (outside this repository)
+
+1. Cut `baseline-v1` with `tag.yml` from the merged `main`.
+2. Register the row in orun-cloud's `infra/baselines-registry/baselines.yaml`
+   (unlisted) with the card vendored at the tag.
+3. Bootstrap one product from the tag against a workspace; record its
+   timings; then flip the row to public with a page on orunbase.com.
+
 ## Sequencing note
 
 KR1's component already names the root's wiring secret; KR2 makes the name
 true. Applying KR2 needs a workspace with a Cloudflare connection; until
-then the Orun lane is gated and `Checks` is the merge gate.
+then the Orun lane plans nothing (`ws_CHANGE_ME`) and `Checks` is the merge
+gate. KR4 packages KR1–KR2 as a baseline whose one landing applies KR2's
+root before it deploys KR1's Worker.

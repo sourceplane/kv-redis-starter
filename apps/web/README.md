@@ -1,56 +1,27 @@
----
-name: Redis Next.js Starter
-slug: kv-redis-starter
-description: Simple Next.js template that uses Redis to track pageviews.
-framework: Next.js
-useCase: Starter
-css: Tailwind
-database: Redis
-deployUrl: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fstorage%2Fkv-redis-starter&project-name=kv-redis-starter&repository-name=kv-redis-starter&demo-title=Vercel%20KV%20for%20Redis%20Next.js%20Starter&demo-description=Simple%20Next.js%20template%20that%20uses%20Vercel%20KV%20for%20Redis%20to%20track%20pageviews.&demo-url=https%3A%2F%2Fkv-redis-starter.vercel.app%2F&demo-image=https%3A%2F%2Fkv-redis-starter.vercel.app%2Fopengraph-image.png&products=%5B%7B"type"%3A"integration"%2C"group"%3A"redis"%7D%5D
-demoUrl: https://kv-redis-starter.vercel.app/
-relatedTemplates:
-  - blob-starter
-  - postgres-starter
----
+# apps/web — the page and its counter
 
-# Redis Next.js Starter
+One page whose view counter goes up by one on every request, from Vercel's
+Redis Next.js Starter ([vercel/examples](https://github.com/vercel/examples/tree/main/storage),
+MIT), running on Cloudflare Workers + Static Assets with the counter in a
+**Workers KV** namespace instead of Redis:
 
-Simple Next.js template that uses Redis to track pageviews.
-
-## Demo
-
-https://kv-redis-starter.vercel.app/
-
-## How to Use
-
-You can choose from one of the following two methods to use this repository:
-
-### One-Click Deploy
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fstorage%2Fkv-redis-starter&project-name=kv-redis-starter&repository-name=kv-redis-starter&demo-title=Vercel%20KV%20for%20Redis%20Next.js%20Starter&demo-description=Simple%20Next.js%20template%20that%20uses%20Vercel%20KV%20for%20Redis%20to%20track%20pageviews.&demo-url=https%3A%2F%2Fkv-redis-starter.vercel.app%2F&demo-image=https%3A%2F%2Fkv-redis-starter.vercel.app%2Fopengraph-image.png&products=%5B%7B"type"%3A"integration"%2C"group"%3A"redis"%7D%5D)
-
-### Clone and Deploy
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [pnpm](https://pnpm.io/installation) to bootstrap the example:
+- `app/page.tsx` — the page, rendered per request (`force-dynamic`)
+- `components/view-counter.tsx` — reads `views` from the `VIEWS` binding,
+  adds one and writes it back
+- `app/site.ts` — the site's name and the repository its links point at
 
 ```bash
-pnpm create next-app --example https://github.com/vercel/examples/tree/main/storage/kv-redis-starter
+pnpm dev        # next dev on http://localhost:3000, a local KV through wrangler's platform proxy
+pnpm build      # next build + opennextjs-cloudflare build → .open-next/
+pnpm preview    # wrangler dev over the built Worker, the same local KV
 ```
 
-Once that's done, copy the .env.example file in this directory to .env.local (which will be ignored by Git):
+The binding's namespace id is not hand-written. `wrangler.template.jsonc`
+names it as a wiring token; `wrangler.jsonc` is that template rendered from
+`wiring.fixture.json` (placeholder ids, for local work and verification), and
+every deploy renders it again from the id the `cloudflare-kv` Terraform root
+published for the environment (`component.yaml`'s `buildCommand`).
 
-```bash
-cp .env.example .env.local
-```
-
-Then open `.env.local` and set the environment variables to match the ones in your Vercel Storage Dashboard.
-
-Next, run Next.js in development mode:
-
-```bash
-pnpm dev
-```
-
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples) ([Documentation](https://nextjs.org/docs/deployment)).
+KV is eventually consistent and has no atomic increment: two visits in the
+same instant can count once, and a key takes about one write per second. That
+is the right trade for a page-view demo; an exact counter is a Durable Object.

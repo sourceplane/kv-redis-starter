@@ -1,0 +1,22 @@
+// GENERATED from wrangler.template.jsonc by tooling/wire — edit the
+// template, not this file. The committed copy is the fixture render
+// (`pnpm run wire:fixture`); every Orun lane renders its own environment.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kv-redis-starter-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  // The page-view counter's store — Workers KV in place of Redis.
+  "kv_namespaces": [
+    {
+      "binding": "VIEWS",
+      "id": "00000000000000000000000000000001"
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 apiVersion: orun.io/v1
 kind: TaskContract
+metadata:
+  name: KR-2
+  title: "The counter on Workers KV"
 spec:
   goal: The upstream Redis starter runs on Cloudflare Workers with its counter in Workers KV, a per-environment rendered wrangler config and green checks
   affects:

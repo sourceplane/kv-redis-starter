@@ -1,9 +1,18 @@
 import './globals.css'
+import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Inter } from 'next/font/google'
+import { SITE_NAME, requestOrigin } from './site'
 
-export const metadata = {
-  title: 'KV Next.js Starter',
-  description: 'A simple Next.js app with Workers KV as the database',
+// The Open Graph image (app/opengraph-image.png) is an absolute URL, which
+// Next resolves against `metadataBase` — and, without one, against
+// `http://localhost:3000`. The origin is the request's own (app/site.ts).
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: SITE_NAME,
+    description: 'A simple Next.js app with Workers KV as the database',
+    metadataBase: requestOrigin(await headers()),
+  }
 }
 
 const inter = Inter({
