@@ -12,10 +12,19 @@ spec:
   # Its own lane per environment: the Next.js build is the longest job in the
   # plan, and a shared lane would wait on it.
   lane: isolated
-  # The KV namespace must exist before this deploys: its id is rendered into
-  # the wrangler config from the cloudflare-kv root's wiring document.
+  # INFRA BEFORE APP. The Worker binds the KV namespace by id, and the id is
+  # rendered into its config during the build from the wiring document the
+  # cloudflare-kv root lease-publishes after its apply. A job resolves its
+  # secrets when it STARTS, so on a merge to main this deploy waits for that
+  # environment's apply (enforced) and the document is there; a pull request
+  # deploys nothing, so nothing on one waits (advisory).
   dependsOn:
     - component: cloudflare-kv
+      mode: enforced
+      modeRules:
+        - mode: advisory
+          when:
+            triggerRef: github-pull-request
   secretEnv:
     WIRING_CLOUDFLARE_KV_STAGE: "secret://kv-redis-starter/kv-redis-starter/stage/WIRING_CLOUDFLARE_KV"
     WIRING_CLOUDFLARE_KV_PROD: "secret://kv-redis-starter/kv-redis-starter/prod/WIRING_CLOUDFLARE_KV"
@@ -59,13 +68,20 @@ spec:
     workersDevSubdomain: your-workers-subdomain
 
     installCommand: pnpm install --frozen-lockfile
-    # Render this environment's wrangler config from the wiring document, then
-    # build (the verify lane already rendered from the fixture through
-    # `wire:fixture`; a deploy lane re-renders with the real namespace id).
-    buildCommand: node ../../tooling/wire/live.mjs --template wrangler.template.jsonc --out wrangler.jsonc --components cloudflare-kv --env "${ORUN_ENVIRONMENT}" && pnpm exec turbo run build --filter=@app/web
+    # Render this environment's wrangler config, then build. stage and prod
+    # render from the wiring document their cloudflare-kv apply published
+    # (secretEnv above, resolved before the job's first step); dev, which no
+    # root applies to and which only verifies, renders from the committed
+    # fixture. The committed wrangler.jsonc (the fixture render) is what the
+    # composition's verify-app-structure step finds before this runs.
+    buildCommand: node ../../tooling/wire/live.mjs --template wrangler.template.jsonc --out wrangler.jsonc --components cloudflare-kv --env "${ORUN_ENVIRONMENT}" --fixture wiring.fixture.json --fixture-envs dev && pnpm exec turbo run build --filter=@app/web
 
-    # Smoke: the home page renders and carries the app's marker text.
-    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -q 'KV on Cloudflare'"
+    # Smoke: the page renders its counter — which only the Worker can do,
+    # reading and writing the VIEWS namespace on the request. Not the site's
+    # name: that is the owner's to change, and HTML-escaped when it carries
+    # an `&` or `'`. The response is buffered before grep so an early match
+    # cannot SIGPIPE curl.
+    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -Eq '[0-9][0-9,]*(<!-- -->)? views'"
   labels:
     team: platform
     layer: delivery

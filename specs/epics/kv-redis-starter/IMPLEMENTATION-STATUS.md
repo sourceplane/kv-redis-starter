@@ -9,6 +9,7 @@ the code departed from `design.md` or from the upstream template.
 | KR1 — the counter on Workers KV | ✅ Shipped | [#2](https://github.com/sourceplane/kv-redis-starter/pull/2) |
 | KR2 — the KV namespace from Terraform | ✅ Shipped (validated; apply gated on a linked workspace) | [#3](https://github.com/sourceplane/kv-redis-starter/pull/3) |
 | KR3 — ready to instantiate | ✅ Shipped | [#4](https://github.com/sourceplane/kv-redis-starter/pull/4) |
+| KR4 — a baseline, in one landing | ✅ Shipped (offline-proven; no live bootstrap yet, risk KR-G) | this PR (KR-5), to be tagged `baseline-v1` |
 
 ## Departures from the upstream template
 
@@ -41,7 +42,80 @@ and the monorepo tracing root are the Workers build's.
 React 19's types accept async server components; the directive became an
 error.
 
-## Verified
+### The page's name and source link come from `app/site.ts` (KR4)
+
+`SITE_NAME` is the heading ("KV on Cloudflare") and the `<title>` (which was
+"KV Next.js Starter"); `SOURCE_URL` is the "Deploy your own" pill and the
+footer's Source link. The footer linked the upstream template's directory,
+whose URL contains this baseline's slug — the rename would have rewritten it
+into a broken link — so it links the product's repository; the upstream is
+credited in `apps/web/README.md` by its parent directory.
+
+### The Open Graph image is absolute on the request's origin (KR4)
+
+The layout's metadata is `generateMetadata`, with `metadataBase` from the
+request's host (`requestOrigin` in `app/site.ts`). The upstream relied on
+Vercel's `VERCEL_URL`; unset, Next resolved the image against
+`http://localhost:3000`.
+
+### `apps/web/README.md` is the app's, not the template's (KR4)
+
+The upstream README advertised "Deploy with Vercel" and `REDIS_URL`, and it
+ships into every product.
+
+## Departures from the port (KR4)
+
+| What | Before | After | Why |
+|---|---|---|---|
+| `apps/web/wrangler.jsonc` | git-ignored, rendered by the build | committed as the fixture render, GENERATED banner; Checks diffs it | the deploy lane checks it exists before the build (risk KR-E) |
+| dev's render | `live.mjs --env dev` → no document → red | `--fixture wiring.fixture.json --fixture-envs dev`; the fixture has a `dev` entry | dev is verify-only; no root applies there (KR-F) |
+| `apps/web` → `cloudflare-kv` | `dependsOn` in the default mode (a PR's web lane waited on the KV plan) | `mode: enforced`, `modeRules` advisory on `github-pull-request` | the one landing's order on main; a PR deploys nothing (cirrus-baseline v22's shape) |
+| `apps/web` smoke | `grep 'KV on Cloudflare'` | a rendered count (`N views`) | the name is the owner's; only a Worker that reached its namespace renders a count |
+| `ci.yml` gate | `vars.ORUN_CI == 'true'` | skip only while `intent.yaml` names `ws_CHANGE_ME` | a bootstrap cannot set a repository variable |
+| `checks.yml` | push to main + PRs | PRs + `workflow_dispatch` | `orun.run/watch@v1` takes the newest run on the merge sha from ANY workflow |
+| stack-tectonic | 0.18.2 | 0.19.0 | first-deploy retry and smoke backoff; not 0.20.0, whose lane-scoped install Next 16's Turbopack refuses |
+| orun lane pin | v2.78.0 | v2.78.4 | cirrus-baseline's and portfolio's pin |
+| `packages/` | absent — `orun plan` failed: `failed to access discovery root packages` | `packages/.gitkeep` | the discovery roots are required |
+| `intent.yaml` docs pages | `specs/epics/…` | `ai/context/*` | the pages must exist in a product |
+| the KV root's prose and names | Cirrus's "api-edge idempotency replay store", "this fork"; `idempotency_namespace_title`, `adopt_idempotency_namespace` | the counter's namespace; `app_kv_title`, `adopt_app_kv` | it ships into every product; no resource address changed |
+| `tooling/wire/render.mjs` | copied the template's header comment | writes a GENERATED banner | the committed render must say it is one |
+| `tasks/KR-1..4` | no `metadata` | `metadata.name` and `title` | `orun work check` (≥ v2.79) refused them |
+
+## Verified (KR4)
+
+- `orun new --status` reads the blueprint at v2.58.11 (the bootstrap floor),
+  v2.78.4 (the lane pin) and v2.79.0: `01-product` 66 files, `02-docs`
+  hook-only. `orun validate` and `orun work check` clean.
+- `testing/{manifest,phases,coverage,rebrand,retouch,bootstrap-defer,wire}.test.sh`
+  green.
+- `testing/leak.test.sh`: 66 files derived; nothing of the factory, nothing
+  local or built, no provenance prose; 59 shipped sources name no factory
+  path.
+- `testing/placement.test.sh` (fixture "Sam's Views & Counts" /
+  `acme-inc/acme-kv-starter`): two landings; rebrand `--verify` clean; the
+  page, the Worker, the KV titles and every secret ref the product's; no
+  file names a factory path; workspace re-tenanted, `work:` stripped,
+  promotion and dev lanes restored; record rendered. The product's own
+  `orun plan --trigger github-push-main` for the 01-product merge:
+  `cloudflare-kv` apply on stage and prod at lane level 0, `web` deploy at
+  level 1, each waiting on its own environment's apply alone; on a pull
+  request `web` waits on nothing; the 02-docs merge plans 0 jobs;
+  `--resume` changes nothing. Green under v2.78.4 and v2.79.0; refused
+  under v2.58.11 (risk KR-H).
+- `testing/e2e.test.sh`: the 01-product landing passes the Checks sequence
+  (the committed config is the fixture render); in the job tree staged as
+  orun stages it, the stage lane's `verify-app-structure`, `build-app` (the
+  live render, from a stage document in the job's environment),
+  `verify-build-output` and `deploy-dry-run` pass, binding `VIEWS` to the
+  document's id; `wrangler dev` serves the built Worker; the component's own
+  smoke passes; `/` carries the product's name, links and origin, its count
+  goes up by exactly one per request, and the Open Graph image, the static
+  assets and a 404 are the product's own. Red at `verify-app-structure` with
+  KR3's ignored `wrangler.jsonc`.
+- `terraform validate` green on `infra/terraform/cloudflare-kv` (1.15.3).
+- Not verified: a live bootstrap against a workspace (risk KR-G).
+
+## Verified (KR1–KR3)
 
 - Local: `pnpm run wire:fixture`, `pnpm typecheck`, `pnpm lint`, `pnpm test`
   (2 tests), `pnpm build` green; `wrangler dev` over the built Worker with a
