@@ -9,7 +9,8 @@ the code departed from `design.md` or from the upstream template.
 | KR1 — the counter on Workers KV | ✅ Shipped | [#2](https://github.com/sourceplane/kv-redis-starter/pull/2) |
 | KR2 — the KV namespace from Terraform | ✅ Shipped (validated; apply gated on a linked workspace) | [#3](https://github.com/sourceplane/kv-redis-starter/pull/3) |
 | KR3 — ready to instantiate | ✅ Shipped | [#4](https://github.com/sourceplane/kv-redis-starter/pull/4) |
-| KR4 — a baseline, in one landing | ✅ Shipped (offline-proven; no live bootstrap yet, risk KR-G) | this PR (KR-5), to be tagged `baseline-v1` |
+| KR4 — a baseline, in one landing | ✅ Shipped (offline-proven; no live bootstrap yet, risk KR-G) | [#5](https://github.com/sourceplane/kv-redis-starter/pull/5) (KR-5), tagged `baseline-v1` |
+| KR5 — the cirrus standard | ✅ Shipped | KR-6 — on `main` after `baseline-v1`, not yet tagged |
 
 ## Departures from the upstream template
 
@@ -80,6 +81,40 @@ ships into every product.
 | the KV root's prose and names | Cirrus's "api-edge idempotency replay store", "this fork"; `idempotency_namespace_title`, `adopt_idempotency_namespace` | the counter's namespace; `app_kv_title`, `adopt_app_kv` | it ships into every product; no resource address changed |
 | `tooling/wire/render.mjs` | copied the template's header comment | writes a GENERATED banner | the committed render must say it is one |
 | `tasks/KR-1..4` | no `metadata` | `metadata.name` and `title` | `orun work check` (≥ v2.79) refused them |
+
+## The cirrus standard (KR5)
+
+Nothing about the counter changed. What changed is the baseline around it:
+
+| What | Before | After | Why |
+|---|---|---|---|
+| orun pin | `kiox.yaml` (v2.15.0) + `kiox.lock`, shipped to every product | gone; orun is pinned where it runs, the `orun-action` `version:` in each workflow | nothing ran the kiox pin, and it disagreed with the lanes (v2.78.4) |
+| `root-kiox`, `root-kiox-lock` modules | in `01-product` | removed (`testing/phases.test.sh` and the rebrand's skip list follow) | a product is placed with 73 files: 66 − 2 kiox + 9 docs pages |
+| component docs | none | `apps/web/docs/`, `infra/terraform/cloudflare-kv/docs/`, `tests/web/docs/` — `overview.md`, `architecture.md`, `runbook.md` | cirrus-baseline documents every component; the workspace Docs library renders `docs/` beside each `component.yaml` |
+| how the docs stay true | — | `tooling/catalog/gen-component-docs.py` derives them from the manifest, the Worker config, Terraform, migrations and package scripts; Baseline CI runs it with `--check` | a hand-written copy of a manifest drifts silently |
+| context pack | `operations.md`, `deployment.md` | plus `current.md`, `decisions.md`, `open-risks.md` | cirrus-baseline's shape; the three new pages are this repository's own and no module places them (the leak gate still allows exactly two) |
+| status | KR4 "this PR (KR-5), to be tagged" | KR4 shipped and tagged `baseline-v1` | the tag existed; the documents had not caught up |
+
+## Verified (KR5)
+
+- `testing/{manifest,phases,coverage,rebrand,retouch,bootstrap-defer,wire}.test.sh`
+  green; `gen-component-docs.py --check` green (3 components, 9 pages).
+- `orun new --status` at v2.58.11: `01-product` 73 files, `02-docs`
+  hook-only.
+- `testing/leak.test.sh` at v2.58.11: 73 files derived; ai/context still
+  exactly the two declared pages; 66 shipped sources name no factory path.
+- `testing/placement.test.sh` at v2.78.4 (the workflow's pin for it): 73
+  files placed, both landings, branded, re-tenanted; the product's own plan
+  applies `cloudflare-kv` on stage and prod before `web` deploys; on a pull
+  request nothing waits; the 02-docs merge plans 0 jobs; `--resume` changes
+  nothing.
+- `pnpm install --frozen-lockfile`, `wire:fixture` (the tree unchanged),
+  `typecheck`, `lint`, `test` (7 tests), `build` green.
+- `testing/e2e.test.sh` at v2.78.4 green: the stage lane in a staged job
+  tree binding `VIEWS` to the stage document's id, `wrangler dev`, the
+  component's own smoke, the count 2 → 3, the Open Graph image, the assets
+  and a 404 the product's own.
+- `orun task check KR-6` complete.
 
 ## Verified (KR4)
 
