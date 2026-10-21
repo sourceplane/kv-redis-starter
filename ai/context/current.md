@@ -19,8 +19,7 @@ records what went live (`02-docs`).
 
 | | |
 |---|---|
-| Latest tag | `baseline-v1` (KR4, [#5](https://github.com/sourceplane/kv-redis-starter/pull/5)) |
-| On `main` since | KR5 — the cirrus standard (no kiox, generated component docs, this context pack) |
+| Latest tag | `baseline-v2` (KR5 — the cirrus standard, [#6](https://github.com/sourceplane/kv-redis-starter/pull/6) and [#7](https://github.com/sourceplane/kv-redis-starter/pull/7): no kiox, generated component docs, this context pack, and the console card reading `subdomain` from the Cloudflare connection); `baseline-v1` is KR4 ([#5](https://github.com/sourceplane/kv-redis-starter/pull/5)) |
 | Proven live | No. Everything short of the platform is proven offline in Baseline CI: the product built in orun's staged job tree, dry-deployed with the stage document's namespace id, served by `wrangler dev` and smoke-tested. No bootstrap from a tag has run against a workspace: the repository link, a real `terraform apply`, a real `wrangler deploy` and the probes are unproven (risk KR-G) |
 
 ## Where to read
@@ -35,6 +34,5 @@ records what went live (`02-docs`).
 
 ## Next
 
-1. Bootstrap one product from a tag against a workspace, and record its
-   timings (closes KR-G); then the registry row can go public.
-2. Cut the next `baseline-vN` with `tag.yml` so the registry can pin KR5.
+1. Bootstrap one product from `baseline-v2` against a workspace, and record
+   its timings (closes KR-G); then the registry row can go public.

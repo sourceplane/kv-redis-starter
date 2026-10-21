@@ -58,7 +58,7 @@ fresh repository: `wrangler.jsonc` committed, dev rendering the fixture,
 - the status file records what is proven offline and what only a live
   bootstrap can prove
 
-## KR5 — the cirrus standard (KR-6) ✅
+## KR5 — the cirrus standard (KR-6, KR-7) ✅
 
 Bring the baseline to cirrus-baseline's standard, with nothing about the
 counter itself changing.
@@ -74,6 +74,12 @@ counter itself changing.
   `open-risks.md` beside the two pages a product ships with — this
   repository's own, so no module places them.
 - **Status that agrees with the tags.** KR4 is shipped and tagged.
+- **The subdomain from the Cloudflare connection (KR-7).** The card's
+  `subdomain` input declares `from: connection.cloudflare.workersSubdomain`,
+  as cirrus-baseline since `baseline-v23`: the console fills it from the
+  connection the build is bound to and renders no field; `manifest.test.sh`
+  accepts the source only while the card requires `cloudflare`. A hand-run
+  build still passes `--set subdomain`.
 
 **Done when**
 - nothing outside this milestone's own record names kiox (`git grep -i
