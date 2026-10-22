@@ -22,7 +22,7 @@ for the design, the milestones and the as-built status.
 git clone --depth 1 --branch <baseline-tag> https://github.com/sourceplane/kv-redis-starter
 cd kv-redis-starter
 orun new --blueprint repo-blueprint.yaml --out ~/sites/acme-views --run-hooks --resume \
-  --set reponame=acme-views --set productname="Acme Views" --set productdomain=acme.dev \
+  --set reponame=acme-views --set productname="Acme Views" \
   --set githuborg=acme-inc --set subdomain=<workers-dev-subdomain>
 ```
 

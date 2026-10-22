@@ -8,15 +8,15 @@ The port keeps the template's page, layout, styles and components. It replaces t
 
 | Field | Value |
 |-------|-------|
-| Status | ✅ KR0–KR5 shipped (#1–#7; KR4 tagged `baseline-v1`, KR5 — the cirrus standard, KR-6 and KR-7 — tagged `baseline-v2`). The KV apply and a live deploy are not yet proven by a live bootstrap (risk KR-G) |
-| Cluster | **KR** (KR0–KR5) |
+| Status | ✅ KR0–KR6 shipped (#1–#8; KR4 tagged `baseline-v1`, KR5 — the cirrus standard, KR-6 and KR-7 — tagged `baseline-v2`, KR6 — the domain is set later, KR-8 — tagged `baseline-v3`). The KV apply and a live deploy are not yet proven by a live bootstrap (risk KR-G) |
+| Cluster | **KR** (KR0–KR6) |
 | Owner(s) | `apps/web` (the page and the counter) · `tests/web` · `infra/terraform/cloudflare-kv` |
 | Builds on | `cirrus-baseline` conventions: the `cloudflare-kv` root and the `@@wiring(...)@@` deploy-time render |
 | Upstream | [vercel/examples `storage/kv-redis-starter`](https://github.com/vercel/examples/tree/main/storage/kv-redis-starter) |
 | Changes | The counter's store (Redis → Workers KV), the Workers build, tests, the KV root and the deploy contract; page copy says KV instead of Redis |
 | Decisions locked | (1) Workers KV, not a Durable Object: the template is a demo counter and KV is the one-to-one of Vercel KV; the design names the DO upgrade path. (2) `wrangler.jsonc` is rendered per environment from the wiring document — and, since KR4, committed as the fixture render, because the deploy lane checks it exists before the build (risk KR-E). (3) `force-dynamic` stays: the count is per request. (4) KR4: one landing — the plan, not a landing boundary, orders the namespace before the Worker. |
 | Gate | KR1 is the first user-visible rung. KR2 applies only with a linked workspace; it is verified by `terraform validate`. |
-| Shipped as | `baseline-v1` ([#5](https://github.com/sourceplane/kv-redis-starter/pull/5)), `baseline-v2` ([#6](https://github.com/sourceplane/kv-redis-starter/pull/6), [#7](https://github.com/sourceplane/kv-redis-starter/pull/7)); proven offline (Baseline CI: contract, leak, placement and the e2e tier), deploy gated until a workspace is linked |
+| Shipped as | `baseline-v3` ([#8](https://github.com/sourceplane/kv-redis-starter/pull/8), KR6: no domain asked), `baseline-v1` ([#5](https://github.com/sourceplane/kv-redis-starter/pull/5)), `baseline-v2` ([#6](https://github.com/sourceplane/kv-redis-starter/pull/6), [#7](https://github.com/sourceplane/kv-redis-starter/pull/7)); proven offline (Baseline CI: contract, leak, placement and the e2e tier), deploy gated until a workspace is linked |
 
 ## Read order
 
@@ -35,3 +35,4 @@ The port keeps the template's page, layout, styles and components. It replaces t
 | KR3 — ready to instantiate | README, as-built status | a reader can run, test, preview and deploy it |
 | KR4 — a baseline, in one landing | card, build document, rename, bootstrap tooling, tests | a new product goes from nothing to live in one landing, the KV namespace applied before the Worker; Baseline CI green |
 | KR5 — the cirrus standard | no kiox, generated component docs, the context pack, status that agrees with the tags; the console card reads `subdomain` from the Cloudflare connection | Baseline CI green with the docs check |
+| KR6 — the domain is set later | the console asks for no domain; an empty `productdomain` brands the placeholder `<reponame>.example.com` for an owner to replace | Baseline CI green on a fixture with no domain |
