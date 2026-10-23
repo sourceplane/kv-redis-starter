@@ -5,6 +5,9 @@ A page whose view counter goes up by one on every request — Next.js on
 [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare), with the count
 in a **Workers KV** namespace that Terraform provisions per environment.
 
+Building on it with an agent? Start it at [AGENTS.md](AGENTS.md): what to
+read first, how a change lands, and what not to touch.
+
 ## Live deployment
 
 <!-- 02-docs:begin -->

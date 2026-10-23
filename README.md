@@ -36,9 +36,10 @@ the KV namespace on stage and prod and then deploys the page with its id;
 [docs/phases/](docs/phases/README.md) has a page per phase.
 
 The new repository receives the **product only** — the app, its KV root, its
-tests, its CI, its tooling, a README of its own and its operating contract —
-renamed throughout to the product's name, repository, Cloudflare Worker and
-namespace titles. None of this repository's machinery ships.
+tests, its CI, its tooling, a README and an `AGENTS.md` of its own and its
+operating contract — renamed throughout to the product's name, repository,
+Cloudflare Worker and namespace titles. None of this repository's machinery
+ships.
 
 | What makes it a baseline | Where |
 |---|---|
@@ -48,7 +49,7 @@ namespace titles. None of this repository's machinery ships.
 | The rename engine | `tooling/rebrand/rebrand.mjs` |
 | The bootstrap's helpers (deferrals, redeploy marker, work-tree strip) | `tooling/bootstrap/` |
 | The deployment-record renderer | `hooks/render-deployment-docs.sh` |
-| The product's README and context pack | `.baseline/product/README.md`, `ai/context/` |
+| The product's README, its `AGENTS.md` and its context pack | `.baseline/product/`, `ai/context/` |
 | The baseline's tests: contract, wiring, leak, offline bootstrap, end to end | `testing/`, `.github/workflows/baseline.yml` |
 | Cutting a `baseline-vN` tag | `.github/workflows/tag.yml` |
 

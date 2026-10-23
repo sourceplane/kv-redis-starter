@@ -1,7 +1,7 @@
 # 01-product — the product, built in one landing
 
-**Places** every module: the root manifests, CI, tooling and the identity
-file; `infra/terraform/cloudflare-kv` (the KV namespace per environment);
+**Places** every module: the root manifests, CI, tooling, the identity
+file, the product's README and its `AGENTS.md` (what an agent reads first); `infra/terraform/cloudflare-kv` (the KV namespace per environment);
 `apps/web` (the page, its OpenNext build, its wrangler template and fixture,
 its deploy contract); `tests/web` (vitest). Then brands them, lands them as
 ONE pull request, and watches the ONE convergence that merge triggers.

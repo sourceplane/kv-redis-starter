@@ -42,7 +42,7 @@ if not phases:
 
 PARTITION = {
     "01-product": ["ai-deployment", "ai-operations", "cloudflare-kv", "discovery-roots",
-                   "github-workflows", "rebrand-values", "root-gitignore", "root-intent",
+                   "github-workflows", "rebrand-values", "root-agents", "root-gitignore", "root-intent",
                    "root-package-json", "root-pnpm-lock",
                    "root-pnpm-workspace", "root-readme", "root-turbo", "tooling-eslint",
                    "tooling-tsconfig", "tooling-wire", "vscode", "web", "web-tests"],
@@ -312,12 +312,22 @@ def check_line(where, line, slot, hook_ids):
 for p in phases:
     n = p.get("narrate") or {}
     ids = {h.get("id") for h in hooks_of(p)}
-    for slot in ("start", "await", "done", "failed"):
+    # `await` is NOT authored. A phase waits on a hook or on a connection its
+    # `requires.probe` asks for, and the engine, which knows which, prints
+    # "<title>: <reason>" when a phase authors no await line (an engine that
+    # predates the reason prints "<name> is waiting."). An authored line
+    # replaces that with a guess, and wrapping the reason does not work
+    # either: it is a clause of its own ("waiting for github, cloudflare to
+    # be connected…"). So an authored await line is refused, not required.
+    for slot in ("start", "done", "failed"):
         line = n.get(slot)
         if not line:
             bad(f"phase {p['name']} declares no narrate.{slot}")
             continue
         check_line(f"phase {p['name']} narrate.{slot}", line, slot, ids)
+    if n.get("await"):
+        bad(f"phase {p['name']} authors narrate.await — leave it out: the engine says "
+            f"what the phase waits on (\"<title>: <reason>\"), and an authored line can only guess")
     for h in ((p.get("hooks") or {}).get("await") or []):
         line = h.get("narrate")
         if not line:
@@ -329,6 +339,13 @@ for p in phases:
         for h in ((p.get("hooks") or {}).get(slot) or []):
             if h.get("narrate"):
                 check_line(f"phase {p['name']} hook {h.get('id')} narrate", h["narrate"], "start", ids)
+# The run's own hooks speak too (orun >= the build panel's engine), under no
+# phase: their scope is the run's hook outputs, and they carry no meta.
+META_AT["run"] = set()
+run_ids = {h.get("id") for h in run_hooks}
+for h in run_hooks:
+    if h.get("narrate"):
+        check_line(f"hooks.preInstantiate {h.get('id')} narrate", h["narrate"], "run", run_ids)
 
 # ── what a baseline of this shape never grows back ────────────────────────
 if (root / "flows").exists():
@@ -344,6 +361,7 @@ placed_n = sum(len(p.get("modules") or []) for p in phases)
 print(f"   {len(publishes)} wiring document(s), {readers} reader(s), each waiting for its publisher on main")
 narrated = sum(len(p.get("narrate") or {}) for p in phases)
 narrated += sum(1 for p in phases for h in hooks_of(p) if h.get("narrate"))
+narrated += sum(1 for h in run_hooks if h.get("narrate"))
 print(f"   {len(phases)} phases, {placed_n} modules, {len(HOOK_ONLY)} hook-only — in execution order")
 print(f"   {narrated} authored narration lines, every reference resolving")
 PY
