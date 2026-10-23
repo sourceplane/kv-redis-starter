@@ -52,3 +52,9 @@ spec:
         - "a site built without a domain is branded with the reserved placeholder <reponame>.example.com wherever the domain goes (BASE_DOMAIN), and its README says how an owner sets the real one"
         - "Baseline CI places, leak-checks and plans a site built with no domain"
       tasks: [KR-8]
+    - name: "KR7 — the build reads true"
+      exitCriteria:
+        - "every line the console's build panel prints for a build of this baseline is true of what happened and short: each hook's line comes from its own outputs, every phase's await line names what it waits on, every start line is one clause (orun-cloud saas-build-panel BV4)"
+        - "each landing is labelled and the docs phase's re-probe files no second set of addresses, through hook keys an older orun ignores"
+        - "a product ships an AGENTS.md that tells an agent what to read first, how a change lands and what not to touch"
+      tasks: [KR-9]

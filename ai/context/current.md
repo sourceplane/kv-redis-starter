@@ -20,6 +20,7 @@ records what went live (`02-docs`).
 | | |
 |---|---|
 | Latest tag | `baseline-v3` (KR6 — the domain is set later, [#8](https://github.com/sourceplane/kv-redis-starter/pull/8): the console asks for no domain, and a site is born with the placeholder `<reponame>.example.com` for an owner to replace); `baseline-v2` is KR5 (the cirrus standard, [#6](https://github.com/sourceplane/kv-redis-starter/pull/6) and [#7](https://github.com/sourceplane/kv-redis-starter/pull/7)), `baseline-v1` KR4 ([#5](https://github.com/sourceplane/kv-redis-starter/pull/5)) |
+| On main, not tagged | KR7 — the build reads true ([#9](https://github.com/sourceplane/kv-redis-starter/pull/9)): every line the console's build panel prints is true and short, the landings are labelled, and the product ships an `AGENTS.md` |
 | Proven live | No. Everything short of the platform is proven offline in Baseline CI: the product built in orun's staged job tree, dry-deployed with the stage document's namespace id, served by `wrangler dev` and smoke-tested. No bootstrap from a tag has run against a workspace: the repository link, a real `terraform apply`, a real `wrangler deploy` and the probes are unproven (risk KR-G) |
 
 ## Where to read
@@ -34,5 +35,6 @@ records what went live (`02-docs`).
 
 ## Next
 
-1. Bootstrap one product from `baseline-v3` against a workspace, and record
-   its timings (closes KR-G); then the registry row can go public.
+1. Cut `baseline-v4` (KR7) with `tag.yml`, and move the registry's pin to it.
+2. Bootstrap one product from the tag against a workspace, and record its
+   timings (closes KR-G); then the registry row can go public.

@@ -1,0 +1,31 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: KR-9
+  title: "The build reads true"
+spec:
+  goal: "Every line the console's build panel prints for this baseline is true and short — each hook says what it did from its own outputs, every phase's await line names what it waits on, every start line is one clause — the landings are labelled and the docs phase's re-probe is quiet, and the product ships an AGENTS.md that hands the repository to an agent (orun-cloud saas-build-panel BV4)"
+  affects:
+    - repo-blueprint.yaml
+    - .baseline/product/AGENTS.md
+    - .baseline/product/README.md
+    - testing/phases.test.sh
+    - testing/manifest.test.sh
+    - testing/leak.test.sh
+    - testing/placement.test.sh
+    - BOOTSTRAP.md
+    - README.md
+    - docs/phases/**
+    - ai/context/current.md
+    - ai/context/decisions.md
+    - ai/context/open-risks.md
+    - specs/**
+    - tasks/**
+  doneWhen:
+    - "the repo, land, link, secret and render hooks and the epic carry a line that is true of what they did (the land line names the PR, or says there was nothing to land), and every phase's narrate.await is `Waiting on {{ .meta.waitingOn }}.` (testing/phases.test.sh holds both)"
+    - "each landing has a `label:`, and 02-docs' re-probe is `quiet: true` — keys an orun older than the build panel's engine ignores, so the blueprint still parses at the bootstrap floor (v2.58.11)"
+    - "the product ships AGENTS.md, pointing at ai/context/operations.md and ai/context/deployment.md, and its README points at AGENTS.md (testing/leak.test.sh, testing/placement.test.sh)"
+    - "no per-environment `.env.<name>` file of an operator's ships; `.env.example` still does"
+    - the contract tests, the docs check, the leak gate and the offline bootstrap are green
+  gates:
+    - checks

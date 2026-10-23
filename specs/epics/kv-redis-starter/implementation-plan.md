@@ -96,6 +96,37 @@ with the reserved placeholder `<reponame>.example.com` where the domain goes
 and its README says how an owner sets the real one; Baseline CI places,
 leak-checks and plans a site built with no domain. Shipped in `baseline-v3`.
 
+## KR7 — the build reads true (KR-9) ✅
+
+orun-cloud's build panel (epic `saas-build-panel`, BV4) prints each hook's
+`narrate:` line as the build's progress and a phase's `narrate.await` as
+what it is waiting on, so every line must be true when it is printed, and
+short.
+
+- **Lines from outputs.** `repo` names the repository it found or created,
+  `land` the pull request it merged — or that there was nothing to land —
+  and `converge` that the run on main is green, or that main had none. The
+  epic, `link`, the two secret reconciles and `render` say what they made.
+- **One await line.** Every phase's `narrate.await` is
+  `Waiting on {{ .meta.waitingOn }}.`: it is also the line while
+  `requires.probe` waits for a connection, which a phase-specific sentence
+  got wrong. Start lines are one clause.
+- **Labels and quiet.** `label: Product` / `label: Docs` on the landings,
+  `quiet: true` on 02-docs' re-probe. An orun older than the panel's engine
+  (v2.86.0) ignores the keys, so the blueprint still parses at the bootstrap
+  floor.
+- **The agent hand-off.** The build ends with "clone the repository and
+  start building on it"; the product now ships `AGENTS.md` (from
+  `.baseline/product/AGENTS.md`), which points at the two context pages.
+- **No operator `.env.<name>` ships.** `ignore` excluded `.env`,
+  `.env.local` and `.env.*.local` but not `.env.production` or wrangler's
+  `.env.stage`; one glob now does, sparing `.env.example`.
+
+**Done when** `testing/phases.test.sh` holds the await line and the run-level
+line to the narration rules, the leak gate and the offline bootstrap place
+`AGENTS.md`, and the blueprint parses at v2.58.11, v2.78.4 and orun main.
+Not in a tag yet: `baseline-v3` predates it.
+
 ## After KR4 (outside this repository)
 
 1. ✅ Cut `baseline-v1` with `tag.yml` from the merged `main`.

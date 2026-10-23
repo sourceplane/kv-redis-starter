@@ -12,4 +12,5 @@ only what is still live, so it should be short.
 Accepted, and worth knowing before you change them: KR-A (KV is not Redis:
 no atomic increment, eventual consistency), KR-B (one write per second per
 key), KR-H (the bootstrap floor plans every edge enforced), KR-I (a custom
-domain is the owner's step).
+domain is the owner's step), KR-J (the build panel's `label` / `quiet` keys
+and the epic's line act only from orun v2.86.0).

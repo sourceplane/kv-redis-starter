@@ -81,3 +81,15 @@ Attaching a domain to a Worker needs zone permissions the brokered
 `workers-deploy` token does not carry, and `dns-edit` needs zone ids a build
 does not have. The product's README says how to attach one; nothing in the
 repository changes, because the page takes its origin from the request.
+
+## KR-J — The build panel's keys wait for the engine that reads them (ACCEPTED)
+
+KR7 adds `label:` to the two landings and `quiet: true` to 02-docs'
+re-probe, and a line to the run-level `epic` hook. orun reads all three
+from v2.86.0 (orun-cloud `saas-build-panel` BV3); every older orun ignores
+the hook keys and prints no run-level line, so the blueprint parses and runs
+the same at the bootstrap floor (v2.58.11) and at the lane pin (v2.78.4).
+An older orun files no facts at all, so the labels and the quiet probe have
+nothing to act on yet, and it reports no run-level step, so the epic's line
+is not printed. Hosted builds install the newest release, so that release
+closes it there; nothing in this repository changes.

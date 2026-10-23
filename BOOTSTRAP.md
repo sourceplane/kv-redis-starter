@@ -106,10 +106,11 @@ The full guide, one page per phase: [docs/phases/README.md](docs/phases/README.m
 | `--until <name>` | places every phase through that one and stops |
 
 What lands in the product is PRODUCT-ONLY: the app, its KV root, its tests,
-its CI, its tooling, its README and its two context pages. None of this
-repository's machinery (`.baseline/`, the blueprints, `tooling/rebrand`,
-`tooling/bootstrap`, `hooks/`, `testing/`, `docs/phases/`, `specs/`,
-`tasks/`, this file) ships, and no file that ships names one of them. That
+its CI, its tooling, its README, its `AGENTS.md` and its two context pages.
+None of this repository's machinery (`.baseline/`, the blueprints,
+`tooling/rebrand`, `tooling/bootstrap`, `hooks/`, `testing/`, `docs/phases/`,
+`specs/`, `tasks/`, this file) ships, and no file that ships names one of
+them. That
 promise is a test: `testing/leak.test.sh` derives what every phase would
 place and gates the set and its sources, and `testing/placement.test.sh`
 gates the same rules over a placed, branded tree.

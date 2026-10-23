@@ -12,6 +12,7 @@ the code departed from `design.md` or from the upstream template.
 | KR4 — a baseline, in one landing | ✅ Shipped (offline-proven; no live bootstrap yet, risk KR-G) | [#5](https://github.com/sourceplane/kv-redis-starter/pull/5) (KR-5), tagged `baseline-v1` |
 | KR5 — the cirrus standard | ✅ Shipped | [#6](https://github.com/sourceplane/kv-redis-starter/pull/6) (KR-6), [#7](https://github.com/sourceplane/kv-redis-starter/pull/7) (KR-7), tagged `baseline-v2` |
 | KR6 — the domain is set later | ✅ Shipped | [#8](https://github.com/sourceplane/kv-redis-starter/pull/8) (KR-8), tagged `baseline-v3` |
+| KR7 — the build reads true | ✅ Shipped (not in a tag yet) | [#9](https://github.com/sourceplane/kv-redis-starter/pull/9) (KR-9) |
 
 ## Departures from the upstream template
 
@@ -170,6 +171,64 @@ which names no domain, writes `"productdomain": ""` and brands
 `acme-kv-starter.example.com` into the site's three `BASE_DOMAIN` lines, its
 README and its `operations.md` (5 lines, 3 files), with no
 `kv-redis-starter.example.com` left. `orun task check KR-8` complete.
+
+## The build reads true (KR7, KR-9)
+
+orun-cloud's build panel (`saas-build-panel` BV1) prints each hook's
+`narrate:` line as the build's progress, the phase's `narrate.await` as what
+it is waiting on, and ends by telling the owner to clone the repository and
+start building on it. Several lines were not true when printed, and the
+product had nothing to hand an agent.
+
+| What | Before | After | Why |
+|---|---|---|---|
+| `repo` line | "The repository exists at <githuborg>/<reponame>." from the inputs | the action's `fullName`, plus "created for this build" when it was | it is the repository the action found or made, not the one asked for |
+| `land` lines | "The product is merged into main." / "The deployment record is merged into main." | "PR #<n> is merged into main.", or "Nothing new to land; main already has it." (`landed: false`) | a re-run whose files main already has merges nothing |
+| `converge` line | 125 characters, one sentence per lane | "The run on main is green: …", or "There is no run on main to watch." (`conclusion: none`) | short, and the watch's own answer |
+| `link`, `secret-*`, `render`, the epic | silent | one line each; the secrets' static (a hook id with `-` cannot be named in a template) | a step that ran with no words reads as nothing happening |
+| every `narrate.await` | a phase-specific sentence ("One convergence is deploying…", "Probing the live endpoints…") | `Waiting on {{ .meta.waitingOn }}.` | it is also the line while `requires.probe` waits for GitHub or Cloudflare, where those sentences were false |
+| `narrate.start` | 01 was 276 characters | one clause each | the panel shows one step card |
+| `done`, `failed` | long; 02's failed said "the site is still live" | short; 02's failed says the phase deploys nothing | a failed final probe is not a live site |
+| `land` hooks | — | `label: Product`, `label: Docs` | the panel names each pull request |
+| 02-docs `verify` | — | `quiet: true` | 01-product's probe already put both addresses in view |
+| the agent hand-off | none | `AGENTS.md` at the product root (`root-agents`, from `.baseline/product/AGENTS.md`); the product README points at it | the build's last words are "start building on it" |
+| `ignore` | `.env`, `.env.local`, `.env.*.local` | plus `**/.env.[^e]*` | an operator's `.env.production` or wrangler `.env.stage` in the working tree shipped (the snapshot is the working tree, not the index); `.env.example` still ships |
+
+`label`, `pin` and `quiet` are read by orun from v2.86.0 (orun-cloud
+`saas-build-panel` BV3) and ignored by every older orun, which is why they
+are safe at the bootstrap floor; the run-level epic line, likewise, is
+printed only from that release (risk KR-J). No new `with:` parameter was
+added: an older orun refuses an action parameter it does not know, at parse
+time. `expectedMinutes` already agree — card 14 = phases 12 + 2.
+
+- `testing/phases.test.sh`: `waitingOn` is part of the await event's meta;
+  every `narrate.await` must name it; the run-level hooks' lines are held to
+  the same rules (their scope is the run's hook outputs, no meta).
+- `testing/leak.test.sh` and `testing/placement.test.sh`: `AGENTS.md` ships,
+  names no factory path and no provenance, points at both context pages,
+  names only paths the product has, and the README points at it; every
+  `.env.<name>` but `.env.example` is a local file.
+- `testing/manifest.test.sh`: its comments named a `domain` input that no
+  longer exists; they name the build-only inputs as they are.
+
+Verified: `testing/{manifest,phases,coverage,rebrand,retouch,bootstrap-defer,wire}.test.sh`
+green (phases: 20 authored lines, every reference resolving);
+`gen-component-docs.py --check` green (3 components); `orun new --status` on
+`repo-blueprint.yaml` as Baseline CI runs it (01-product pending, 74 files)
+at v2.58.11, v2.78.4, orun main and the build panel's engine (BV3);
+`testing/leak.test.sh` at v2.58.11 (74 files derived; 67 shipped sources
+name no factory path); `testing/placement.test.sh` at v2.78.4 (74 tracked
+files; cloudflare-kv → web on stage and prod; the 02-docs merge plans 0
+jobs; `--resume` changes nothing); `testing/e2e.test.sh` at v2.78.4 (the
+count 2 → 3). Every authored line rendered against a fresh build's outputs
+and a re-run's (`created: false`, `landed: false`, `conclusion: none`):
+each is true of both, the longest 98 characters. Mutation checks: a
+phase-specific await line, an await event without `waitingOn`, a run-level
+line asserting `done` or naming `.meta`, a product without `AGENTS.md` and
+an `AGENTS.md` naming `testing/` each fail their gate, naming it; with the
+new `ignore` entry removed, a canary `apps/web/.env.production` is derived
+into the product and the leak gate refuses it. `orun task check KR-9`
+complete; `orun work check` clean at v2.78.4 (1 epic, 9 contracts).
 
 ## Verified (KR5)
 

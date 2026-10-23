@@ -42,7 +42,7 @@ if not phases:
 
 PARTITION = {
     "01-product": ["ai-deployment", "ai-operations", "cloudflare-kv", "discovery-roots",
-                   "github-workflows", "rebrand-values", "root-gitignore", "root-intent",
+                   "github-workflows", "rebrand-values", "root-agents", "root-gitignore", "root-intent",
                    "root-package-json", "root-pnpm-lock",
                    "root-pnpm-workspace", "root-readme", "root-turbo", "tooling-eslint",
                    "tooling-tsconfig", "tooling-wire", "vscode", "web", "web-tests"],
@@ -261,9 +261,12 @@ for page in sorted(pages - set(names)):
     bad(f"docs/phases/{page}.md documents a phase repo-blueprint.yaml does not declare")
 
 # ── narration: authored here, printed from state (Cirrus's rules) ─────────
+# `waitingOn` is what a waiting phase waits on — a hook's pending reason, or
+# the provider a `requires.probe` is still asking for. Only the `await` line
+# is rendered while waiting, so only it may name it.
 META_AT = {
     "start": {"files", "expectedMinutes"},
-    "await": {"files", "expectedMinutes"},
+    "await": {"files", "expectedMinutes", "waitingOn"},
     "failed": {"files", "expectedMinutes"},
     "done": {"files", "expectedMinutes", "elapsed", "next"},
 }
@@ -318,6 +321,12 @@ for p in phases:
             bad(f"phase {p['name']} declares no narrate.{slot}")
             continue
         check_line(f"phase {p['name']} narrate.{slot}", line, slot, ids)
+    # The await line is printed whenever the phase waits — on a hook, or on a
+    # connection its `requires.probe` asks for — so it is true only if it
+    # names what it waits on.
+    if n.get("await") and "meta.waitingOn" not in refs(n["await"]):
+        bad(f"phase {p['name']} narrate.await does not name .meta.waitingOn — it is also "
+            f"the line while a provider probe waits, so it must say what it waits on")
     for h in ((p.get("hooks") or {}).get("await") or []):
         line = h.get("narrate")
         if not line:
@@ -329,6 +338,13 @@ for p in phases:
         for h in ((p.get("hooks") or {}).get(slot) or []):
             if h.get("narrate"):
                 check_line(f"phase {p['name']} hook {h.get('id')} narrate", h["narrate"], "start", ids)
+# The run's own hooks speak too (orun >= the build panel's engine), under no
+# phase: their scope is the run's hook outputs, and they carry no meta.
+META_AT["run"] = set()
+run_ids = {h.get("id") for h in run_hooks}
+for h in run_hooks:
+    if h.get("narrate"):
+        check_line(f"hooks.preInstantiate {h.get('id')} narrate", h["narrate"], "run", run_ids)
 
 # ── what a baseline of this shape never grows back ────────────────────────
 if (root / "flows").exists():
@@ -344,6 +360,7 @@ placed_n = sum(len(p.get("modules") or []) for p in phases)
 print(f"   {len(publishes)} wiring document(s), {readers} reader(s), each waiting for its publisher on main")
 narrated = sum(len(p.get("narrate") or {}) for p in phases)
 narrated += sum(1 for p in phases for h in hooks_of(p) if h.get("narrate"))
+narrated += sum(1 for h in run_hooks if h.get("narrate"))
 print(f"   {len(phases)} phases, {placed_n} modules, {len(HOOK_ONLY)} hook-only — in execution order")
 print(f"   {narrated} authored narration lines, every reference resolving")
 PY

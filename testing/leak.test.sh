@@ -3,11 +3,12 @@
 #
 # A site built from this baseline is somebody's site, not a copy of this
 # repository. It gets the product: the app, its KV root, its tests, its CI,
-# its tooling, its README and its two context pages. It does NOT get the
-# factory: the blueprints, the bootstrap and rebrand tooling, the test gates,
-# the task contracts and identity under `.baseline/`, this repository's own
-# epic and task tree, or BOOTSTRAP.md — and no file it does get may so much
-# as NAME one of those paths, because in the product they do not exist.
+# its tooling, its README, its AGENTS.md and its two context pages. It does
+# NOT get the factory: the blueprints, the bootstrap and rebrand tooling, the
+# test gates, the task contracts and identity under `.baseline/`, this
+# repository's own epic and task tree, or BOOTSTRAP.md — and no file it does
+# get may so much as NAME one of those paths, because in the product they do
+# not exist.
 #
 # This asks orun to DERIVE the placement — every file every phase would write
 # — and gates that set and the sources it is copied from. Derivation runs no
@@ -78,7 +79,8 @@ for p in placed:
             bad(f"{p} would ship — it is the factory, not the site")
 
 # ── nothing local and nothing built ───────────────────────────────────────
-LOCAL = re.compile(r"(^|/)(\.env(\.[^/]*\.local|\.local)?|\.dev\.vars(\..*)?|node_modules|\.next|"
+# `.env` and every `.env.<name>` but the committed `.env.example`.
+LOCAL = re.compile(r"(^|/)(\.env(\.(?!example$)[^/]*)?|\.dev\.vars(\..*)?|node_modules|\.next|"
                    r"\.open-next|\.wrangler|\.turbo|\.orun|\.terraform|next-env\.d\.ts|[^/]*\.tsbuildinfo|"
                    r"[^/]*\.tfstate(\.backup)?|\.terraform\.lock\.hcl)(/|$)")
 for p in placed:
@@ -86,8 +88,9 @@ for p in placed:
         bad(f"{p} would ship — a local or built file of whoever ran the bootstrap")
 
 # ── the site's README, not this repository's ──────────────────────────────
-if "README.md" not in placed:
-    bad("README.md would not ship")
+for must in ("README.md", "AGENTS.md"):
+    if must not in placed:
+        bad(f"{must} would not ship")
 for must in (".github/workflows/ci.yml", ".github/workflows/checks.yml",
              "apps/web/component.yaml", "apps/web/app/site.ts", "tests/web/component.yaml",
              ".rebrand/values.json", "apps/web/.env.example", "packages/.gitkeep",
@@ -141,6 +144,7 @@ PROVENANCE = re.compile(
     re.I,
 )
 SOURCES = {"README.md": ".baseline/product/README.md",
+           "AGENTS.md": ".baseline/product/AGENTS.md",
            "ai/context/operations.md": "ai/context/operations.md",
            "ai/context/deployment.md": "ai/context/deployment.md"}
 for shipped, src in SOURCES.items():
