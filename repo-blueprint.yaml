@@ -416,14 +416,17 @@ phases:
     # full Next.js build), the merge, the KV apply, then the page's build,
     # deploy and smoke on stage and prod side by side.
     expectedMinutes: 12
-    # WHAT A READER SEES. The console shows `start` as the phase begins, each
-    # hook's `narrate:` as that hook finishes, and `await` as what the build
-    # is waiting on — which is also the line while `requires.probe` waits for
-    # a connection, so it names `.meta.waitingOn` rather than guessing.
-    # Short, and only what is true when it is printed.
+    # WHAT A READER SEES. The console shows `start` as the phase begins and
+    # each hook's `narrate:` as that hook finishes. Short, and only what is
+    # true when it is printed.
+    #
+    # NO `await` LINE, in either phase. A waiting phase is waiting on a hook
+    # or on a connection its `requires.probe` asks for, and only the engine
+    # knows which: unauthored, it prints "<title>: <reason>" with the reason
+    # as the wait states it. An authored line could only guess, or wrap the
+    # reason (already a clause) in words of its own.
     narrate:
       start:  "Building the product and deploying it to stage and prod, in about {{ .meta.expectedMinutes }} minutes."
-      await:  'Waiting on {{ .meta.waitingOn }}.'
       done:   "{{ .inputs.productname }} is live on stage and prod, {{ .meta.files }} files on main, in {{ .meta.elapsed }}."
       failed: "The product is not live yet. The step that stopped names why; whatever deployed is still there."
     modules: [ai-deployment, ai-operations, cloudflare-kv, discovery-roots, github-workflows, rebrand-values, root-agents, root-gitignore, root-intent, root-package-json, root-pnpm-lock, root-pnpm-workspace, root-readme, root-turbo, tooling-eslint, tooling-tsconfig, tooling-wire, vscode, web, web-tests]
@@ -649,7 +652,6 @@ phases:
     expectedMinutes: 2
     narrate:
       start:  "Recording the live deployment from what its URLs answer."
-      await:  'Waiting on {{ .meta.waitingOn }}.'
       done:   "ai/context/deployment.md records the live deployment, and prod waits on stage again."
       failed: "This phase deploys nothing, so the site is as 01-product left it; the step that stopped names why."
     modules: []

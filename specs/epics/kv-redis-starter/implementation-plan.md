@@ -99,18 +99,19 @@ leak-checks and plans a site built with no domain. Shipped in `baseline-v3`.
 ## KR7 — the build reads true (KR-9) ✅
 
 orun-cloud's build panel (epic `saas-build-panel`, BV4) prints each hook's
-`narrate:` line as the build's progress and a phase's `narrate.await` as
-what it is waiting on, so every line must be true when it is printed, and
-short.
+`narrate:` line as the build's progress and a waiting phase's line as what
+it is waiting on, so every line must be true when it is printed, and short.
 
 - **Lines from outputs.** `repo` names the repository it found or created,
   `land` the pull request it merged — or that there was nothing to land —
   and `converge` that the run on main is green, or that main had none. The
   epic, `link`, the two secret reconciles and `render` say what they made.
-- **One await line.** Every phase's `narrate.await` is
-  `Waiting on {{ .meta.waitingOn }}.`: it is also the line while
-  `requires.probe` waits for a connection, which a phase-specific sentence
-  got wrong. Start lines are one clause.
+- **No await line.** Neither phase authors `narrate.await`. A phase waits
+  on a hook or on a connection its `requires.probe` asks for, and only the
+  engine knows which: unauthored, it prints `<title>: <reason>`. The
+  phase-specific sentences were false while a probe waited, and wrapping
+  the reason does not work either — it is a clause of its own. Start lines
+  are one clause.
 - **Labels and quiet.** `label: Product` / `label: Docs` on the landings,
   `quiet: true` on 02-docs' re-probe. An orun older than the panel's engine
   (v2.86.0) ignores the keys, so the blueprint still parses at the bootstrap
@@ -122,8 +123,8 @@ short.
   `.env.local` and `.env.*.local` but not `.env.production` or wrangler's
   `.env.stage`; one glob now does, sparing `.env.example`.
 
-**Done when** `testing/phases.test.sh` holds the await line and the run-level
-line to the narration rules, the leak gate and the offline bootstrap place
+**Done when** `testing/phases.test.sh` refuses an authored await line and
+holds the run-level line to the narration rules, the leak gate and the offline bootstrap place
 `AGENTS.md`, and the blueprint parses at v2.58.11, v2.78.4 and orun main.
 Not in a tag yet: `baseline-v3` predates it.
 

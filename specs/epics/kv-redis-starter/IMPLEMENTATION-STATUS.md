@@ -175,8 +175,8 @@ README and its `operations.md` (5 lines, 3 files), with no
 ## The build reads true (KR7, KR-9)
 
 orun-cloud's build panel (`saas-build-panel` BV1) prints each hook's
-`narrate:` line as the build's progress, the phase's `narrate.await` as what
-it is waiting on, and ends by telling the owner to clone the repository and
+`narrate:` line as the build's progress, a waiting phase's line as what it
+is waiting on, and ends by telling the owner to clone the repository and
 start building on it. Several lines were not true when printed, and the
 product had nothing to hand an agent.
 
@@ -186,7 +186,7 @@ product had nothing to hand an agent.
 | `land` lines | "The product is merged into main." / "The deployment record is merged into main." | "PR #<n> is merged into main.", or "Nothing new to land; main already has it." (`landed: false`) | a re-run whose files main already has merges nothing |
 | `converge` line | 125 characters, one sentence per lane | "The run on main is green: …", or "There is no run on main to watch." (`conclusion: none`) | short, and the watch's own answer |
 | `link`, `secret-*`, `render`, the epic | silent | one line each; the secrets' static (a hook id with `-` cannot be named in a template) | a step that ran with no words reads as nothing happening |
-| every `narrate.await` | a phase-specific sentence ("One convergence is deploying…", "Probing the live endpoints…") | `Waiting on {{ .meta.waitingOn }}.` | it is also the line while `requires.probe` waits for GitHub or Cloudflare, where those sentences were false |
+| every `narrate.await` | a phase-specific sentence ("One convergence is deploying…", "Probing the live endpoints…") | none — the engine prints `<title>: <reason>` (an orun that predates the reason, `<phase> is waiting.`) | a phase also waits while `requires.probe` asks for GitHub or Cloudflare, where those sentences were false; and the reason is a clause of its own, so `Waiting on {{ .meta.waitingOn }}.` read "Waiting on waiting for …" |
 | `narrate.start` | 01 was 276 characters | one clause each | the panel shows one step card |
 | `done`, `failed` | long; 02's failed said "the site is still live" | short; 02's failed says the phase deploys nothing | a failed final probe is not a live site |
 | `land` hooks | — | `label: Product`, `label: Docs` | the panel names each pull request |
@@ -201,9 +201,10 @@ printed only from that release (risk KR-J). No new `with:` parameter was
 added: an older orun refuses an action parameter it does not know, at parse
 time. `expectedMinutes` already agree — card 14 = phases 12 + 2.
 
-- `testing/phases.test.sh`: `waitingOn` is part of the await event's meta;
-  every `narrate.await` must name it; the run-level hooks' lines are held to
-  the same rules (their scope is the run's hook outputs, no meta).
+- `testing/phases.test.sh`: a phase no longer needs a `narrate.await`, and
+  one that authors it is refused (the engine's line is the true one); the
+  run-level hooks' lines are held to the narration rules (their scope is the
+  run's hook outputs, no meta).
 - `testing/leak.test.sh` and `testing/placement.test.sh`: `AGENTS.md` ships,
   names no factory path and no provenance, points at both context pages,
   names only paths the product has, and the README points at it; every
@@ -212,7 +213,7 @@ time. `expectedMinutes` already agree — card 14 = phases 12 + 2.
   longer exists; they name the build-only inputs as they are.
 
 Verified: `testing/{manifest,phases,coverage,rebrand,retouch,bootstrap-defer,wire}.test.sh`
-green (phases: 20 authored lines, every reference resolving);
+green (phases: 18 authored lines, every reference resolving);
 `gen-component-docs.py --check` green (3 components); `orun new --status` on
 `repo-blueprint.yaml` as Baseline CI runs it (01-product pending, 74 files)
 at v2.58.11, v2.78.4, orun main and the build panel's engine (BV3);
@@ -222,9 +223,8 @@ files; cloudflare-kv → web on stage and prod; the 02-docs merge plans 0
 jobs; `--resume` changes nothing); `testing/e2e.test.sh` at v2.78.4 (the
 count 2 → 3). Every authored line rendered against a fresh build's outputs
 and a re-run's (`created: false`, `landed: false`, `conclusion: none`):
-each is true of both, the longest 98 characters. Mutation checks: a
-phase-specific await line, an await event without `waitingOn`, a run-level
-line asserting `done` or naming `.meta`, a product without `AGENTS.md` and
+each is true of both, the longest 98 characters. Mutation checks: an
+authored await line, a run-level line asserting `done` or naming `.meta`, a product without `AGENTS.md` and
 an `AGENTS.md` naming `testing/` each fail their gate, naming it; with the
 new `ignore` entry removed, a canary `apps/web/.env.production` is derived
 into the product and the leak gate refuses it. `orun task check KR-9`

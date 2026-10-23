@@ -261,12 +261,9 @@ for page in sorted(pages - set(names)):
     bad(f"docs/phases/{page}.md documents a phase repo-blueprint.yaml does not declare")
 
 # ── narration: authored here, printed from state (Cirrus's rules) ─────────
-# `waitingOn` is what a waiting phase waits on — a hook's pending reason, or
-# the provider a `requires.probe` is still asking for. Only the `await` line
-# is rendered while waiting, so only it may name it.
 META_AT = {
     "start": {"files", "expectedMinutes"},
-    "await": {"files", "expectedMinutes", "waitingOn"},
+    "await": {"files", "expectedMinutes"},
     "failed": {"files", "expectedMinutes"},
     "done": {"files", "expectedMinutes", "elapsed", "next"},
 }
@@ -315,18 +312,22 @@ def check_line(where, line, slot, hook_ids):
 for p in phases:
     n = p.get("narrate") or {}
     ids = {h.get("id") for h in hooks_of(p)}
-    for slot in ("start", "await", "done", "failed"):
+    # `await` is NOT authored. A phase waits on a hook or on a connection its
+    # `requires.probe` asks for, and the engine, which knows which, prints
+    # "<title>: <reason>" when a phase authors no await line (an engine that
+    # predates the reason prints "<name> is waiting."). An authored line
+    # replaces that with a guess, and wrapping the reason does not work
+    # either: it is a clause of its own ("waiting for github, cloudflare to
+    # be connected…"). So an authored await line is refused, not required.
+    for slot in ("start", "done", "failed"):
         line = n.get(slot)
         if not line:
             bad(f"phase {p['name']} declares no narrate.{slot}")
             continue
         check_line(f"phase {p['name']} narrate.{slot}", line, slot, ids)
-    # The await line is printed whenever the phase waits — on a hook, or on a
-    # connection its `requires.probe` asks for — so it is true only if it
-    # names what it waits on.
-    if n.get("await") and "meta.waitingOn" not in refs(n["await"]):
-        bad(f"phase {p['name']} narrate.await does not name .meta.waitingOn — it is also "
-            f"the line while a provider probe waits, so it must say what it waits on")
+    if n.get("await"):
+        bad(f"phase {p['name']} authors narrate.await — leave it out: the engine says "
+            f"what the phase waits on (\"<title>: <reason>\"), and an authored line can only guess")
     for h in ((p.get("hooks") or {}).get("await") or []):
         line = h.get("narrate")
         if not line:
