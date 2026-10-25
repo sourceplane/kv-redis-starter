@@ -91,7 +91,7 @@ for p in placed:
 for must in ("README.md", "AGENTS.md"):
     if must not in placed:
         bad(f"{must} would not ship")
-for must in (".github/workflows/ci.yml", ".github/workflows/checks.yml",
+for must in (".github/workflows/ci.yml",
              "apps/web/component.yaml", "apps/web/app/site.ts", "tests/web/component.yaml",
              ".rebrand/values.json", "apps/web/.env.example", "packages/.gitkeep",
              # the wiring path: the template, its fixture, the committed render

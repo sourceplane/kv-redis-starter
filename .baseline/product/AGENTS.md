@@ -37,15 +37,16 @@ pnpm run wire:fixture        # apps/web/wrangler.jsonc from the offline fixture
 pnpm typecheck && pnpm lint && pnpm test && pnpm build
 ```
 
-That is what `.github/workflows/checks.yml` runs on every pull request.
+Run them yourself: the pull request's lanes build and dry-deploy the page
+and plan the KV root, but do not run the tests or the linter.
 
 ## How changes land
 
 - One change, one pull request into `main`. If the work is an Orun task,
   open the pull request for it: `orun pr open --task <KEY>`.
-- On the pull request, Checks must pass, and `ci.yml` plans with
-  `orun plan --changed` and verifies: the KV root plans, the page builds and
-  dry-deploys. Nothing applies or deploys.
+- On the pull request, `ci.yml` plans with `orun plan --changed` and
+  verifies: the KV root plans, the page builds and dry-deploys. Nothing
+  applies or deploys.
 - The merge is the deploy. `ci.yml` plans the changed components and runs
   each lane: the KV namespace applies first, then the page builds with its
   id, deploys and is smoke-tested — stage, then prod.
@@ -59,7 +60,8 @@ That is what `.github/workflows/checks.yml` runs on every pull request.
   authenticates to. Also the stack-tectonic pin (`0.19.0`); its comment says
   why it is not `0.20.0`.
 - `apps/web/wrangler.jsonc` is generated. Edit `wrangler.template.jsonc`,
-  then `pnpm run wire:fixture`; Checks fails when the two disagree.
+  then `pnpm run wire:fixture`, and commit both; the deploy renders its own
+  config from the template, so a stale committed render misleads local work.
 - `apps/web/component.yaml`'s `dependsOn: cloudflare-kv`: it is what makes
   the namespace apply before the Worker deploys on `main`.
 - The last line of each `component.yaml` (`# orun: redeploy …`) is a deploy
