@@ -1,7 +1,7 @@
 # kv-redis-starter — operating contract (for humans and agents)
 
 This is the standing guide to how this site is deployed and operated.
-Instance facts (live URLs, workspace, secrets inventory) live in
+Instance facts (live URLs, workspace, the secrets it uses) live in
 [deployment.md](deployment.md), rendered from probed reality by the
 bootstrap's `02-docs` phase; this file is the contract that stays true
 between deployments. It is written to give an agent with repository read
@@ -70,8 +70,9 @@ Caveats that matter:
   converged"; probe the URLs instead.
 - A change to `intent.yaml`'s `environments` maps to no component and
   redeploys nothing on its own. Land it with a change under `apps/web`.
-- `wrangler.jsonc` is generated. Edit `wrangler.template.jsonc` and run
-  `pnpm run wire:fixture`; Checks fails when the two disagree.
+- `wrangler.jsonc` is generated. Edit `wrangler.template.jsonc`, run
+  `pnpm run wire:fixture` and commit both; the deploy renders its own
+  config from the template, so a stale committed render misleads local work.
 
 ## Secrets model
 

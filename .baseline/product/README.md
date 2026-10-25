@@ -12,7 +12,7 @@ read first, how a change lands, and what not to touch.
 
 <!-- 02-docs:begin -->
 Not recorded yet. The bootstrap's last phase writes the live URLs, the
-workspace and the secrets inventory into
+workspace and the secrets the site uses into
 [ai/context/deployment.md](ai/context/deployment.md); how the site deploys
 and how to operate it is in
 [ai/context/operations.md](ai/context/operations.md).
@@ -56,8 +56,7 @@ The Worker binds the namespace as `VIEWS`. Its id is never hand-written:
 (placeholder ids) for local work and verification, and on every deploy from
 the document the `cloudflare-kv` Terraform root publishes after its apply
 (`WIRING_CLOUDFLARE_KV`, per environment). Edit the template, then
-`pnpm run wire:fixture`; Checks fails if the committed `wrangler.jsonc` is
-not the fixture render.
+`pnpm run wire:fixture` and commit the render with the template.
 
 KV is eventually consistent and has no atomic increment: two visits in the
 same instant can count once, and a key accepts about one write per second.
@@ -72,9 +71,11 @@ the page builds with that environment's namespace id and deploys — to
 `stage`, then to `prod` once stage has converged on the same commit; `dev`
 only verifies. The Worker is `kv-redis-starter-web-<env>` on your account's
 workers.dev subdomain, and every deploy is smoke-tested over HTTP: the page
-must render a count. `checks.yml` runs install, the fixture render,
-typecheck, lint, test and build on every pull request. (A push to `main`
-runs `ci.yml` alone, which applies, builds and deploys.)
+must render a count. A pull request runs the same pipeline's verify lanes,
+with nothing applied or deployed: the KV namespace planned for stage and
+prod, and the page built and dry-deployed for each environment. They do not
+run the tests or the linter — run those before you push (Getting started,
+above). (A push to `main` applies, builds and deploys.)
 
 The pipeline holds one credential, GitHub's own `GITHUB_TOKEN`. The
 Cloudflare token and account id are brokered per run from the workspace's

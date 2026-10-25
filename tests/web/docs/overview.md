@@ -1,5 +1,7 @@
 # web-tests
 
+The page's vitest suite — the site identity, the request origin and the view counter against a mocked KV namespace
+
 The test suite for **web**. It deploys nothing: its lane installs, builds and runs the tests.
 
 |              |                      |
